@@ -32,7 +32,6 @@ migrate = Migrate(app, db)  # bootstrap flask application with database
 # Filters.
 # ----------------------------------------------------------------------------#
 
-
 def format_datetime(value, format="medium"):
     date = dateutil.parser.parse(value)
     if format == "full":
@@ -43,6 +42,22 @@ def format_datetime(value, format="medium"):
 
 
 app.jinja_env.filters["datetime"] = format_datetime
+
+from datetime import datetime
+shows = db.session.query(Show).join(Artist, Artist.id == Show.artist_id).filter(Artist.id == artist_id).all()
+past_shows = []
+upcoming_shows = []
+for show in shows:
+    temp_show = {
+        "venue_id": show.venue_id,
+        "venue_name": show.venue.name,
+        "artist_image_link": show.venue.image_link,
+        "venue_image_link": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    if show.start_time <= datetime.now():
+        past_shows.append(temp_show)
+    else:
+        upcoming_shows.append(temp_show)
 
 # ----------------------------------------------------------------------------#
 # Controllers.
@@ -151,7 +166,7 @@ def show_venue(venue_id):
                 "artist_id": show.artist_id,
                 "artist_name": show.artist.name,
                 "artist_image_link": show.artist.image_link,
-                "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "venue_image_link": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
 
@@ -307,7 +322,7 @@ def show_artist(artist_id):
                 "venue_id": show.venue_id,
                 "venue_name": show.venue.name,
                 "artist_image_link": show.venue.image_link,
-                "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "venue_image_link": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
 
@@ -326,7 +341,7 @@ def show_artist(artist_id):
                 "venue_id": show.venue_id,
                 "venue_name": show.venue.name,
                 "artist_image_link": show.venue.image_link,
-                "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "venue_image_link": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
 
@@ -506,7 +521,7 @@ def shows():
                 "artist_id": show.artist_id,
                 "artist_name": show.artist.name,
                 "artist_image_link": show.artist.image_link,
-                "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "venue_image_link": show.start_time.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
 
